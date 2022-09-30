@@ -53,53 +53,39 @@ def view(path: PathLike, output: PathLike, interpolate: bool = None) -> None:
         
         event_time, event_name, event_value = event
         
+        event_time = localize(event_time)
+        
         labels: list[Label] = []
         vlines: list[Span] = []
         
-        if event_name == "premarket plunge":
+        if event_name == "stock cliff":
+            vlines.append(Span(location=event_time, dimension='height', line_color='#f43546', line_width=3, line_alpha=0.5))
+            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' CLIFF', text_font_style="bold"))
+        elif event_name == "stock cliff corrected":
             vlines.append(Span(location=event_time, dimension='height', line_color='#398e3b', line_width=3, line_alpha=0.5))
-            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' PMP', text_font_style="bold"))
-        elif event_name == "trading cancelled":
+            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' CLIFF C', text_font_style="bold"))
+        elif event_name == "verification done":
+            vlines.append(Span(location=event_time, dimension='height', line_color='#398e3b', line_width=3, line_alpha=0.5))
+            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' VDONE', text_font_style="bold"))
+        elif event_name == "verification part 1":
+            vlines.append(Span(location=event_time, dimension='height', line_color='#398e3b', line_width=3, line_alpha=0.5))
+            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' VP1', text_font_style="bold"))
+        elif event_name == "verification reset":
             vlines.append(Span(location=event_time, dimension='height', line_color='#f43546', line_width=3, line_alpha=0.8))
-            labels.append(Label(x=(event_time), y=(60), y_units='screen', text=' TRADING CANCELLED', text_font_style="bold"))
-        elif event_name == "calculated premarket low":
-            vlines.append(Span(location=event_time, dimension='height', line_color='#800080', line_width=3, line_alpha=0.5))
-            labels.append(Label(x=(event_time), y=(40), y_units='screen', text=f' PML ${event_value}', text_font_style="bold"))
-        elif event_name == "premarket low hit":
-            vlines.append(Span(location=event_time, dimension='height', line_color='#800080', line_width=3, line_alpha=0.5))
-            labels.append(Label(x=(event_time), y=(60), y_units='screen', text=f' PML HIT', text_font_style="bold"))
-        elif event_name == "mutual drop":
-            vlines.append(Span(location=event_time, dimension='height', line_color='#398e3b', line_width=1, line_alpha=0.5))
-        elif event_name == "mutual drop reset":
-            vlines.append(Span(location=event_time, dimension='height', line_color='#398e3b', line_width=1, line_alpha=0.8))
-            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' RESET', text_font_style="bold"))
-        elif event_name == "buy signal":
-            labels.append(Label(x=(event_time), y=(100), y_units='screen', text=' BUY', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(80), y_units='screen', text=f' ${results.buy_price}', text_font_style="bold"))
+            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=' VRESET', text_font_style="bold"))
+        elif event_name == "signal 1":
+            labels.append(Label(x=(event_time), y=(100), y_units='screen', text=' SIGNAL 1', text_font_style="bold"))
+            # labels.append(Label(x=(event_time), y=(80), y_units='screen', text=f' ${results.buy_price}', text_font_style="bold"))
             labels.append(Label(x=(event_time), y=(60), y_units='screen', text=f' {event_time.time()}', text_font_style="bold"))
-            vlines.append(Span(location=event_time, dimension='height', line_color='#2c60ff', line_width=3, line_alpha=0.5))
-        elif event_name == "sell signal 1":
-            labels.append(Label(x=(event_time), y=(100), y_units='screen', text=' SELL 1', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(80), y_units='screen', text=f' ${results.sell_price}', text_font_style="bold"))
+            vlines.append(Span(location=event_time, dimension='height', line_color='#2c60ff', line_width=3, line_alpha=0.8))
+        elif event_name == "signal 2":
+            labels.append(Label(x=(event_time), y=(100), y_units='screen', text=f' SIGNAL 2 {event_value}', text_font_style="bold"))
+            # labels.append(Label(x=(event_time), y=(80), y_units='screen', text=f' ${results.sell_price}', text_font_style="bold"))
             labels.append(Label(x=(event_time), y=(60), y_units='screen', text=f' {event_time.time()}', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(40), y_units='screen', text=f'  Δ%: {str(results.pnl_perc() * 100).ljust(5)[:5]}%', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=f' P&L: {str(results.pnl_bps()).ljust(5)[:6]}bps', text_font_style="bold"))
+            # labels.append(Label(x=(event_time), y=(40), y_units='screen', text=f'  Δ%: {str(results.pnl_perc() * 100).ljust(5)[:5]}%', text_font_style="bold"))
+            # labels.append(Label(x=(event_time), y=(20), y_units='screen', text=f' P&L: {str(results.pnl_bps()).ljust(5)[:6]}bps', text_font_style="bold"))
             vlines.append(Span(location=event_time, dimension='height', line_color='#f43546', line_width=3, line_alpha=0.5))
-        elif event_name == "sell signal 2":
-            labels.append(Label(x=(event_time), y=(100), y_units='screen', text=' SELL 2', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(80), y_units='screen', text=f' ${results.sell_price}', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(60), y_units='screen', text=f' {event_time.time()}', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(40), y_units='screen', text=f'  Δ%: {str(results.pnl_perc() * 100).ljust(5)[:5]}%', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=f' P&L: {str(results.pnl_bps()).ljust(5)[:6]}bps', text_font_style="bold"))
-            vlines.append(Span(location=event_time, dimension='height', line_color='#f43546', line_width=3, line_alpha=0.5))
-        elif event_name == "sell signal 3":
-            labels.append(Label(x=(event_time), y=(100), y_units='screen', text=' SELL 3', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(80), y_units='screen', text=f' ${results.sell_price}', text_font_style="bold"))  
-            labels.append(Label(x=(event_time), y=(60), y_units='screen', text=f' {event_time.time()}', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(40), y_units='screen', text=f'  Δ%: {str(results.pnl_perc() * 100).ljust(5)[:5]}%', text_font_style="bold"))
-            labels.append(Label(x=(event_time), y=(20), y_units='screen', text=f' P&L: {str(results.pnl_bps()).ljust(5)[:6]}bps', text_font_style="bold"))
-            vlines.append(Span(location=event_time, dimension='height', line_color='#f43546', line_width=3, line_alpha=0.5))
-
+        
         for label in labels:
             plot.add_layout(label)
             
