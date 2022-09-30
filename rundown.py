@@ -88,12 +88,32 @@ meaning events looks something like this:
 ]
 """
 
-events_formatted: str = '\n'.join(str(e) for e in events)
+events_formatted: pd.DataFrame = pd.DataFrame([[event.time, event.name, event.value] for event in events], columns=["Time", "Name", "Value"])
 print(f"\n> contents of events (formatted):\n{events_formatted}\n")
+
+"""
+I also formatted the contents of `events` however, note that they actually look like this (for the 2022-08-11 example):
+
+If you want to see it in the console set `show_events_raw` below to `True`.
+
+[
+    StrategyEvent(time=Timestamp('2022-08-12 09:35:55-0400', tz='tzoffset(None, -14400)'), name='stock cliff', value=None),
+    StrategyEvent(time=Timestamp('2022-08-12 09:36:31-0400', tz='tzoffset(None, -14400)'), name='stock cliff corrected', value=None),
+    ...,
+    StrategyEvent(time=Timestamp('2022-08-12 09:40:48-0400', tz='tzoffset(None, -14400)'), name='verification part 1', value=None),
+    StrategyEvent(time=Timestamp('2022-08-12 09:42:02-0400', tz='tzoffset(None, -14400)'), name='verification reset', value=None)]
+]
+"""
+
+show_events_raw: bool = False
+if show_events_raw:
+    events_formatted_raw: str = '\n'.join(str(e) for e in events)
+    print(f"\n> contents of events (raw) (formatted):\n{events_formatted_raw}\n")
 
 # events is just a list of strategy results.
 # refer to StrategyResults for detail (ctrl + click on `StrategyResults` below)
 results: list[StrategyResults]
 
 results_formatted: str = '\n'.join(str(r) for r in results)
+# the 2022-08-11 example shows what it looks like when there is no trade.
 print(f"\n> contents of results (formatted):\n{results_formatted}\n")
